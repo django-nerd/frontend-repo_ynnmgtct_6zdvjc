@@ -1,6 +1,7 @@
 import Hero from './components/Hero'
 import Dashboard from './components/Dashboard'
 import Chatbot from './components/Chatbot'
+import PdfUploader from './components/PdfUploader'
 
 function App() {
   return (
@@ -18,12 +19,18 @@ function App() {
           </div>
           <div className="flex gap-4 text-sm text-blue-200/80">
             <a href="#dashboard" className="hover:text-white">Dashboard</a>
+            <a href="#upload" className="hover:text-white">Upload</a>
             <a href="#chat" className="hover:text-white">Chat</a>
           </div>
         </div>
       </nav>
 
       <Hero />
+      <section id="upload" className="py-6">
+        <div className="max-w-6xl mx-auto px-6">
+          <PdfUploader onUploaded={() => window.location.hash = '#dashboard'} />
+        </div>
+      </section>
       <Dashboard />
       <Chatbot />
 
