@@ -23,7 +23,9 @@ export default function PdfUploader({ onUploaded }) {
       });
       const data = await res.json();
       if (res.ok) {
-        setStatus(`Imported ${data.inserted} of ${data.parsed} lines`);
+        const skipped = data.skipped_no_marker || 0;
+        const msg = `Imported ${data.inserted} of ${data.parsed} exact-matched rows` + (skipped ? ` • Skipped ${skipped} rows without explicit CR/DR markers` : '');
+        setStatus(msg);
         onUploaded && onUploaded();
       } else {
         setStatus(data.detail || 'Failed to parse PDF');
@@ -54,7 +56,12 @@ export default function PdfUploader({ onUploaded }) {
             {loading ? 'Uploading…' : 'Import PDF'}
           </button>
         </div>
-        {status && <div className="mt-3 text-blue-100">{status}</div>}
+        {status && (
+          <div className="mt-3 text-blue-100 text-sm">
+            {status}
+          </div>
+        )}
+        <p className="mt-2 text-xs text-blue-200/70">For exact matching, only lines with an explicit CR/DR indicator are imported. Others are left out to avoid guessing.</p>
       </div>
     </section>
   );
