@@ -1,9 +1,12 @@
+import { useState } from 'react'
 import Hero from './components/Hero'
 import Dashboard from './components/Dashboard'
 import Chatbot from './components/Chatbot'
 import PdfUploader from './components/PdfUploader'
 
 function App() {
+  const [refreshKey, setRefreshKey] = useState(0)
+
   return (
     <div className="min-h-screen bg-slate-950 text-white">
       {/* Background accents */}
@@ -28,10 +31,10 @@ function App() {
       <Hero />
       <section id="upload" className="py-6">
         <div className="max-w-6xl mx-auto px-6">
-          <PdfUploader onUploaded={() => window.location.hash = '#dashboard'} />
+          <PdfUploader onUploaded={() => setRefreshKey(k => k + 1)} />
         </div>
       </section>
-      <Dashboard />
+      <Dashboard refreshKey={refreshKey} />
       <Chatbot />
 
       <footer className="py-10 text-center text-xs text-blue-300/60">Built with ❤️</footer>

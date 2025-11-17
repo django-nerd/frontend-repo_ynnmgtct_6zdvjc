@@ -2,40 +2,30 @@ import { useEffect, useState } from 'react';
 
 const API = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
 
-export default function Dashboard() {
+export default function Dashboard({ refreshKey = 0 }) {
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState(null);
   const [error, setError] = useState('');
 
-  async function seedIfEmpty() {
+  async function load() {
     try {
-      const r = await fetch(`${API}/dashboard/summary`);
-      if (r.ok) {
-        const data = await r.json();
-        // If database empty, outflow and inflow likely zeros and no categories
-        const isEmpty = !data || (data.inflow_30d === 0 && data.outflow_30d === 0 && Object.keys(data.by_category || {}).length === 0);
-        if (isEmpty) {
-          await fetch(`${API}/demo/seed`, { method: 'POST' });
-        }
-      }
-    } catch {}
+      const res = await fetch(`${API}/dashboard/summary?days=0`);
+      if (!res.ok) throw new Error('Failed to load');
+      const data = await res.json();
+      setSummary(data);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
-    (async () => {
-      try {
-        await seedIfEmpty();
-        const res = await fetch(`${API}/dashboard/summary`);
-        if (!res.ok) throw new Error('Failed to load');
-        const data = await res.json();
-        setSummary(data);
-      } catch (e) {
-        setError(e.message);
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
+    setLoading(true);
+    setError('');
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshKey]);
 
   if (loading) {
     return (
@@ -59,8 +49,8 @@ export default function Dashboard() {
         <h2 className="text-2xl md:text-3xl font-semibold text-white mb-6">Overview</h2>
         <div className="grid md:grid-cols-3 gap-4">
           <StatCard label="Combined balance" value={`₹${summary.total_balance?.toLocaleString()}`} />
-          <StatCard label="Inflow (30d)" value={`₹${summary.inflow_30d?.toLocaleString()}`} />
-          <StatCard label="Outflow (30d)" value={`₹${summary.outflow_30d?.toLocaleString()}`} />
+          <StatCard label="Inflow (all time)" value={`₹${summary.inflow_lookback?.toLocaleString()}`} />
+          <StatCard label="Outflow (all time)" value={`₹${summary.outflow_lookback?.toLocaleString()}`} />
         </div>
 
         <div className="grid md:grid-cols-2 gap-6 mt-8">
